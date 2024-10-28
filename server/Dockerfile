@@ -1,5 +1,5 @@
 # Builder
-FROM node:14 AS client-builder
+FROM node:20 AS client-builder
 LABEL author="Andreas Sehr"
 ENV BUILD_BASE_URL=/replacemeurl/
 WORKDIR /usr/src/
