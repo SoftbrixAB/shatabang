@@ -45,7 +45,7 @@
     "passport-local": "1.0.0",
     "redis": "3.1.2",
     "sha256": "0.2.0",
-    "stureby-index": "^3.3.0",
+    "stureby-index": "^4.0.0",
     "vemdalen-index": "^2.0.2"
   },
   "preferGlobal": true,
