@@ -55,6 +55,6 @@
   "license": "MIT",
   "homepage": "https://github.com/softbrix/shatabang#readme",
   "devDependencies": {
-    "supertest": "^7.0.0"
+    "supertest": "^7.1.4"
   }
 }
