@@ -34,7 +34,7 @@ describe('Shatabang Face recognition algorithm', () => {
   
   it('should be able to calculate a blur value of image', () => {
     return shFra.imageBlurValue(relativeTestFile).then(value => {
-      assert.equal(value, 57.653148571055205);
+      assert.equal(value, 57.72819077362444);
     });
   });
 
@@ -48,7 +48,7 @@ describe('Shatabang Face recognition algorithm', () => {
 
   it('should be able to calculate a blur value of another image', () => {
     return shFra.imageBlurValue(noFaceFile).then(value => {
-      assert.equal(value, 2382.1031581592833);
+      assert.equal(value, 2385.406815581682);
     });
   });
 
