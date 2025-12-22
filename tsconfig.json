@@ -3,10 +3,10 @@
     "target": "ES2020",
     "module": "commonjs",
     "lib": ["ES2020"],
-    "outDir": "./dist",
-    "rootDir": "./",
-    "removeComments": true,
-    "strict": true,
+    "outDir": "./modules",
+    "rootDir": "./modules",
+    "removeComments": false,
+    "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
@@ -16,7 +16,10 @@
     "declarationMap": true,
     "sourceMap": true,
     "preserveSymlinks": true,
-    "typeRoots": ["./node_modules/@types"]
+    "allowJs": true,
+    "typeRoots": ["./node_modules/@types"],
+    "types": []
   },
-  "exclude": ["node_modules", "dist", "coverage", "client", "test"]
+  "include": ["modules/**/*.ts"],
+  "exclude": ["node_modules", "coverage", "client", "test"]
 }
