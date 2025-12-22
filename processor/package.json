@@ -51,6 +51,9 @@
     "vemdalen-index": "^2.0.2"
   },
   "devDependencies": {
+    "@types/bull": "^4.10.4",
+    "@types/fluent-ffmpeg": "^2.1.28",
+    "@types/sharp": "^0.32.0",
     "fakeredis": "2.0.0",
     "mocha": "^10.7.3",
     "nodemon": "^3.1.4",
