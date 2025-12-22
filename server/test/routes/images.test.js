@@ -153,7 +153,7 @@ describe('Images Route - /api/images', () => {
 
       expect(mockShFiles.moveFile).toHaveBeenCalledWith(
         expect.stringContaining('photo.jpg'),
-        expect.stringContaining(config.deletedDir)
+        expect.stringContaining('deleted/photo.jpg')
       );
     });
 

@@ -21,7 +21,7 @@ let apiEndpoint: string;
 
 router.post('/delete', function(req, res) {
   if (!req.body.length) {
-    res.send("Missing post data").status(400);
+    res.status(400).send("Missing post data");
     return;
   }
 
@@ -47,7 +47,7 @@ router.post('/delete', function(req, res) {
     task_queue.queueTask('update_directory_list', { title: directory, dir: directory }, 'high');
   });
 
-  res.send("OK").status(200);
+  res.status(200).send("OK");
 });
 
 router.get('/listgoo', async (req: any, res) => {
