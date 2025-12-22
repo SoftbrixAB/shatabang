@@ -29,9 +29,9 @@
   ],
   "dependencies": {
     "@tensorflow-models/blazeface": "0.1.0",
-    "@tensorflow/tfjs-converter": "4.21.0",
-    "@tensorflow/tfjs-core": "4.21.0",
-    "@tensorflow/tfjs-node": "4.21.0",
+    "@tensorflow/tfjs-converter": "^4.22.0",
+    "@tensorflow/tfjs-core": "^4.22.0",
+    "@tensorflow/tfjs-node": "^4.22.0",
     "bull": "^4.16.5",
     "canny-edge-detector": "^1.0.0",
     "fluent-ffmpeg": "2.1.3",
