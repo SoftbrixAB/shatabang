@@ -162,7 +162,7 @@ if (config.adminHash) {
 (config as any).passport = passport;
 
 app.use(bodyParser.json());
-app.use(compression());
+app.use(compression() as any);
 app.use(session({
   secret: config.serverSalt!,
   name: 'cookie67',
@@ -172,8 +172,8 @@ app.use(session({
     client: redisClient,
     ttl: 900
   })
-}));
-app.use(passport.initialize());
+}) as any);
+app.use(passport.initialize() as any);
 app.use(passport.session());
 
 const sendIndex = function(req: express.Request, res: express.Response) {
