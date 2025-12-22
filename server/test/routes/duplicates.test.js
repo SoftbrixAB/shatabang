@@ -1,72 +1,58 @@
 "use strict";
 const request = require("supertest");
 const express = require('express');
-const { createMockConfig, createMockIndexes } = require('../helpers/test-setup');
+const { createMockConfig } = require('../helpers/test-setup');
 
-// Create mock indexes at module level
-const mockIndexes = createMockIndexes();
+// Helper function to create a fresh app with custom mock
+function createAppWithMock(mockData) {
+  const mockFingerIndex = {
+    keys: jest.fn(() => mockData.keys || []),
+    get: jest.fn((key) => {
+      if (mockData.getMap && mockData.getMap[key]) {
+        return mockData.getMap[key];
+      }
+      return mockData.defaultGet || [];
+    }),
+    set: jest.fn(() => true)
+  };
 
-// Mock the indexes module before requiring the route
-jest.mock('../../common/indexes', () => mockIndexes, { virtual: true });
+  const mockIndexes = {
+    imgFingerIndex: jest.fn(() => mockFingerIndex)
+  };
+
+  jest.resetModules();
+  jest.doMock('../../common/indexes', () => mockIndexes, { virtual: true });
+
+  const config = createMockConfig();
+  delete require.cache[require.resolve('../../routes/duplicates')];
+  const router = require('../../routes/duplicates').default || require('../../routes/duplicates');
+
+  const app = express();
+  if (router.initialize) {
+    router.initialize(config);
+  }
+  app.use('/api/duplicates', router);
+
+  return { app, mockFingerIndex };
+}
 
 describe('Duplicates Route - /api/duplicates', () => {
-  let app;
-  let config;
-  let duplicatesRouter;
-
-  beforeEach(() => {
-    config = createMockConfig();
-
-    // Get fresh router
-    delete require.cache[require.resolve('../../routes/duplicates')];
-    duplicatesRouter = require('../../routes/duplicates').default || require('../../routes/duplicates');
-
-    app = express();
-
-    if (duplicatesRouter.initialize) {
-      duplicatesRouter.initialize(config);
-    }
-
-    app.use('/api/duplicates', duplicatesRouter);
-
-    // Reset mocks
-    const fingerIndex = mockIndexes.imgFingerIndex();
-    fingerIndex.keys.mockClear();
-    fingerIndex.get.mockClear();
-  });
-
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.resetModules();
   });
 
   describe('GET /list', () => {
     it('should return list of duplicate images', async () => {
-      const mockFingerIndex = mockIndexes.imgFingerIndex();
-
-      // Override the mock functions for this specific test
-      mockFingerIndex.keys = jest.fn(() => [
-        'finger-abc123',
-        'finger-def456',
-        'finger-ghi789'
-      ]);
-
-      mockFingerIndex.get = jest.fn((key) => {
-        if (key === 'finger-abc123') return ['img1.jpg', 'img2.jpg', 'img3.jpg'];
-        if (key === 'finger-def456') return ['img4.jpg', 'img5.jpg'];
-        if (key === 'finger-ghi789') return ['img6.jpg'];
-        return [];
+      const { app } = createAppWithMock({
+        keys: ['finger-abc123', 'finger-def456', 'finger-ghi789'],
+        getMap: {
+          'finger-abc123': ['img1.jpg', 'img2.jpg', 'img3.jpg'],
+          'finger-def456': ['img4.jpg', 'img5.jpg'],
+          'finger-ghi789': ['img6.jpg']
+        }
       });
 
-      // Reinitialize router with new mock
-      delete require.cache[require.resolve('../../routes/duplicates')];
-      const freshRouter = require('../../routes/duplicates').default || require('../../routes/duplicates');
-      const freshApp = express();
-      if (freshRouter.initialize) {
-        freshRouter.initialize(config);
-      }
-      freshApp.use('/api/duplicates', freshRouter);
-
-      const response = await request(freshApp).get('/api/duplicates/list');
+      const response = await request(app).get('/api/duplicates/list');
 
       expect(response.statusCode).toBe(200);
       expect(response.headers['content-type']).toContain('application/json');
@@ -87,23 +73,16 @@ describe('Duplicates Route - /api/duplicates', () => {
     });
 
     it('should return empty array when no duplicates exist', async () => {
-      const mockFingerIndex = mockIndexes.imgFingerIndex();
-
-      mockFingerIndex.keys = jest.fn(() => ['finger-1', 'finger-2', 'finger-3']);
-      mockFingerIndex.get = jest.fn((key) => {
-        if (key === 'finger-1') return ['single1.jpg'];
-        if (key === 'finger-2') return ['single2.jpg'];
-        if (key === 'finger-3') return ['single3.jpg'];
-        return [];
+      const { app } = createAppWithMock({
+        keys: ['finger-1', 'finger-2', 'finger-3'],
+        getMap: {
+          'finger-1': ['single1.jpg'],
+          'finger-2': ['single2.jpg'],
+          'finger-3': ['single3.jpg']
+        }
       });
 
-      delete require.cache[require.resolve('../../routes/duplicates')];
-      const freshRouter = require('../../routes/duplicates').default || require('../../routes/duplicates');
-      const freshApp = express();
-      if (freshRouter.initialize) freshRouter.initialize(config);
-      freshApp.use('/api/duplicates', freshRouter);
-
-      const response = await request(freshApp).get('/api/duplicates/list');
+      const response = await request(app).get('/api/duplicates/list');
 
       expect(response.statusCode).toBe(200);
       const result = JSON.parse(response.text);
@@ -111,18 +90,12 @@ describe('Duplicates Route - /api/duplicates', () => {
     });
 
     it('should return empty array when no fingerprints exist', async () => {
-      const mockFingerIndex = mockIndexes.imgFingerIndex();
+      const { app } = createAppWithMock({
+        keys: [],
+        defaultGet: []
+      });
 
-      mockFingerIndex.keys = jest.fn(() => []);
-      mockFingerIndex.get = jest.fn(() => []);
-
-      delete require.cache[require.resolve('../../routes/duplicates')];
-      const freshRouter = require('../../routes/duplicates').default || require('../../routes/duplicates');
-      const freshApp = express();
-      if (freshRouter.initialize) freshRouter.initialize(config);
-      freshApp.use('/api/duplicates', freshRouter);
-
-      const response = await request(freshApp).get('/api/duplicates/list');
+      const response = await request(app).get('/api/duplicates/list');
 
       expect(response.statusCode).toBe(200);
       const result = JSON.parse(response.text);
@@ -130,32 +103,18 @@ describe('Duplicates Route - /api/duplicates', () => {
     });
 
     it('should handle mix of duplicates and non-duplicates', async () => {
-      const mockFingerIndex = mockIndexes.imgFingerIndex();
-
-      mockFingerIndex.keys = jest.fn(() => [
-        'finger-a',
-        'finger-b',
-        'finger-c',
-        'finger-d',
-        'finger-e'
-      ]);
-
-      mockFingerIndex.get = jest.fn((key) => {
-        if (key === 'finger-a') return ['unique1.jpg'];
-        if (key === 'finger-b') return ['dup1.jpg', 'dup2.jpg'];
-        if (key === 'finger-c') return ['unique2.jpg'];
-        if (key === 'finger-d') return ['dup3.jpg', 'dup4.jpg', 'dup5.jpg'];
-        if (key === 'finger-e') return ['unique3.jpg'];
-        return [];
+      const { app } = createAppWithMock({
+        keys: ['finger-a', 'finger-b', 'finger-c', 'finger-d', 'finger-e'],
+        getMap: {
+          'finger-a': ['unique1.jpg'],
+          'finger-b': ['dup1.jpg', 'dup2.jpg'],
+          'finger-c': ['unique2.jpg'],
+          'finger-d': ['dup3.jpg', 'dup4.jpg', 'dup5.jpg'],
+          'finger-e': ['unique3.jpg']
+        }
       });
 
-      delete require.cache[require.resolve('../../routes/duplicates')];
-      const freshRouter = require('../../routes/duplicates').default || require('../../routes/duplicates');
-      const freshApp = express();
-      if (freshRouter.initialize) freshRouter.initialize(config);
-      freshApp.use('/api/duplicates', freshRouter);
-
-      const response = await request(freshApp).get('/api/duplicates/list');
+      const response = await request(app).get('/api/duplicates/list');
 
       expect(response.statusCode).toBe(200);
       const result = JSON.parse(response.text);
@@ -167,23 +126,16 @@ describe('Duplicates Route - /api/duplicates', () => {
     });
 
     it('should handle large duplicate groups', async () => {
-      const mockFingerIndex = mockIndexes.imgFingerIndex();
-
       const largeGroup = Array.from({ length: 50 }, (_, i) => `duplicate${i + 1}.jpg`);
 
-      mockFingerIndex.keys = jest.fn(() => ['finger-large']);
-      mockFingerIndex.get = jest.fn((key) => {
-        if (key === 'finger-large') return largeGroup;
-        return [];
+      const { app } = createAppWithMock({
+        keys: ['finger-large'],
+        getMap: {
+          'finger-large': largeGroup
+        }
       });
 
-      delete require.cache[require.resolve('../../routes/duplicates')];
-      const freshRouter = require('../../routes/duplicates').default || require('../../routes/duplicates');
-      const freshApp = express();
-      if (freshRouter.initialize) freshRouter.initialize(config);
-      freshApp.use('/api/duplicates', freshRouter);
-
-      const response = await request(freshApp).get('/api/duplicates/list');
+      const response = await request(app).get('/api/duplicates/list');
 
       expect(response.statusCode).toBe(200);
       const result = JSON.parse(response.text);
@@ -192,22 +144,15 @@ describe('Duplicates Route - /api/duplicates', () => {
     });
 
     it('should handle fingerprint keys with special characters', async () => {
-      const mockFingerIndex = mockIndexes.imgFingerIndex();
-
-      mockFingerIndex.keys = jest.fn(() => ['finger-abc_123', 'finger-def-456']);
-      mockFingerIndex.get = jest.fn((key) => {
-        if (key === 'finger-abc_123') return ['file1.jpg', 'file2.jpg'];
-        if (key === 'finger-def-456') return ['file3.jpg', 'file4.jpg'];
-        return [];
+      const { app } = createAppWithMock({
+        keys: ['finger-abc_123', 'finger-def-456'],
+        getMap: {
+          'finger-abc_123': ['file1.jpg', 'file2.jpg'],
+          'finger-def-456': ['file3.jpg', 'file4.jpg']
+        }
       });
 
-      delete require.cache[require.resolve('../../routes/duplicates')];
-      const freshRouter = require('../../routes/duplicates').default || require('../../routes/duplicates');
-      const freshApp = express();
-      if (freshRouter.initialize) freshRouter.initialize(config);
-      freshApp.use('/api/duplicates', freshRouter);
-
-      const response = await request(freshApp).get('/api/duplicates/list');
+      const response = await request(app).get('/api/duplicates/list');
 
       expect(response.statusCode).toBe(200);
       const result = JSON.parse(response.text);
@@ -217,27 +162,18 @@ describe('Duplicates Route - /api/duplicates', () => {
     });
 
     it('should handle file names with special characters', async () => {
-      const mockFingerIndex = mockIndexes.imgFingerIndex();
-
-      mockFingerIndex.keys = jest.fn(() => ['finger-test']);
-      mockFingerIndex.get = jest.fn((key) => {
-        if (key === 'finger-test') {
-          return [
+      const { app } = createAppWithMock({
+        keys: ['finger-test'],
+        getMap: {
+          'finger-test': [
             'photo (1).jpg',
             'photo-edited_final.jpg',
             'my vacation 2023.jpg'
-          ];
+          ]
         }
-        return [];
       });
 
-      delete require.cache[require.resolve('../../routes/duplicates')];
-      const freshRouter = require('../../routes/duplicates').default || require('../../routes/duplicates');
-      const freshApp = express();
-      if (freshRouter.initialize) freshRouter.initialize(config);
-      freshApp.use('/api/duplicates', freshRouter);
-
-      const response = await request(freshApp).get('/api/duplicates/list');
+      const response = await request(app).get('/api/duplicates/list');
 
       expect(response.statusCode).toBe(200);
       const result = JSON.parse(response.text);
@@ -249,12 +185,13 @@ describe('Duplicates Route - /api/duplicates', () => {
     });
 
     it('should properly format JSON response', async () => {
-      const mockFingerIndex = mockIndexes.imgFingerIndex();
-
-      mockFingerIndex.keys.mockReturnValueOnce(['key1', 'key2']);
-      mockFingerIndex.get
-        .mockReturnValueOnce(['a.jpg', 'b.jpg'])
-        .mockReturnValueOnce(['c.jpg', 'd.jpg']);
+      const { app } = createAppWithMock({
+        keys: ['key1', 'key2'],
+        getMap: {
+          'key1': ['a.jpg', 'b.jpg'],
+          'key2': ['c.jpg', 'd.jpg']
+        }
+      });
 
       const response = await request(app).get('/api/duplicates/list');
 

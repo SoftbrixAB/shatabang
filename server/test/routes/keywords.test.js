@@ -57,7 +57,8 @@ describe('Keywords Route - GET /api/keywords', () => {
       const response = await request(app).get('/api/keywords');
 
       expect(response.statusCode).toBe(200);
-      expect(response.body).toEqual({ keywords: ['keyword1', 'keyword2', 'keyword3'] });
+      const result = JSON.parse(response.text);
+      expect(result).toEqual({ keywords: ['keyword1', 'keyword2', 'keyword3'] });
     });
 
     it('should return empty array when no keywords exist', async () => {
@@ -66,7 +67,8 @@ describe('Keywords Route - GET /api/keywords', () => {
       const response = await request(app).get('/api/keywords');
 
       expect(response.statusCode).toBe(200);
-      expect(response.body).toEqual({ keywords: [] });
+      const result = JSON.parse(response.text);
+      expect(result).toEqual({ keywords: [] });
     });
 
     it('should handle Redis errors', async () => {
@@ -97,7 +99,8 @@ describe('Keywords Route - GET /api/keywords', () => {
       const response = await request(app).get('/api/keywords/nature');
 
       expect(response.statusCode).toBe(200);
-      expect(response.body).toEqual({ keyword: ['value1', 'value2', 'value3'] });
+      const result = JSON.parse(response.text);
+      expect(result).toEqual({ keyword: ['value1', 'value2', 'value3'] });
     });
 
     it('should return empty array for non-existent keyword', async () => {
@@ -106,7 +109,8 @@ describe('Keywords Route - GET /api/keywords', () => {
       const response = await request(app).get('/api/keywords/nonexistent');
 
       expect(response.statusCode).toBe(200);
-      expect(response.body).toEqual({ keyword: [] });
+      const result = JSON.parse(response.text);
+      expect(result).toEqual({ keyword: [] });
     });
 
     it('should handle special characters in keyword id', async () => {
@@ -115,7 +119,8 @@ describe('Keywords Route - GET /api/keywords', () => {
       const response = await request(app).get('/api/keywords/keyword-with-dash');
 
       expect(response.statusCode).toBe(200);
-      expect(response.body).toEqual({ keyword: ['val1', 'val2'] });
+      const result = JSON.parse(response.text);
+      expect(result).toEqual({ keyword: ['val1', 'val2'] });
     });
 
     it('should handle Redis errors when fetching keyword values', async () => {

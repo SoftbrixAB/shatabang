@@ -13,7 +13,7 @@ router.get('/', function(req, res) {
     res.end(JSON.stringify({ keywords: keys }));
   })
     .catch((err: Error) => {
-      res.status(500).end(err);
+      res.status(500).end(err.message);
     });
 });
 
@@ -21,7 +21,7 @@ router.get('/:id', function(req, res) {
   index.get(req.params.id)
     .then(
       (values: any) => res.end(JSON.stringify({ keyword: values })),
-      (err: Error) => res.status(500).end(err)
+      (err: Error) => res.status(500).end(err.message)
     );
 });
 

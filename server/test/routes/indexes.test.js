@@ -10,6 +10,27 @@ const mockIndexes = createMockIndexes();
 // Mock the indexes module before requiring the route
 jest.mock('../../common/indexes', () => mockIndexes, { virtual: true });
 
+// Helper function to create a fresh app with custom mock configuration
+function createAppWithCustomMock(customMockIndexes) {
+  jest.resetModules();
+  jest.doMock('../../common/indexes', () => customMockIndexes, { virtual: true });
+
+  const config = createMockConfig();
+  delete require.cache[require.resolve('../../routes/indexes')];
+  const router = require('../../routes/indexes').default || require('../../routes/indexes');
+
+  const app = express();
+  app.use(bodyParser.json());
+
+  if (router.initialize) {
+    router.initialize(config);
+  }
+
+  app.use('/api/indexes', router);
+
+  return { app, customMockIndexes };
+}
+
 describe('Indexes Route - /api/indexes', () => {
   let app;
   let config;
@@ -52,22 +73,20 @@ describe('Indexes Route - /api/indexes', () => {
     });
 
     it('should return empty array when no SHA keys exist', async () => {
-      // Override the fileShaIndex mock to return empty array
-      const mockShaIndex = mockIndexes.fileShaIndex();
-      mockShaIndex.keys = jest.fn(() => []);
+      // Create custom mock that returns empty array
+      const emptyMockShaIndex = {
+        keys: jest.fn(() => [])
+      };
 
-      // Need to reinitialize the router with the new mock
-      delete require.cache[require.resolve('../../routes/indexes')];
-      const freshRouter = require('../../routes/indexes').default || require('../../routes/indexes');
+      const customMockIndexes = {
+        fileShaIndex: jest.fn(() => emptyMockShaIndex),
+        imgFingerIndex: jest.fn(() => mockIndexes.imgFingerIndex()),
+        ratingIndex: jest.fn(() => mockIndexes.ratingIndex())
+      };
 
-      const freshApp = express();
-      freshApp.use(bodyParser.json());
-      if (freshRouter.initialize) {
-        freshRouter.initialize(config);
-      }
-      freshApp.use('/api/indexes', freshRouter);
+      const { app } = createAppWithCustomMock(customMockIndexes);
 
-      const response = await request(freshApp).get('/api/indexes/sha/keys');
+      const response = await request(app).get('/api/indexes/sha/keys');
 
       expect(response.statusCode).toBe(200);
       expect(response.body).toEqual([]);
@@ -83,24 +102,22 @@ describe('Indexes Route - /api/indexes', () => {
     });
 
     it('should handle errors gracefully', async () => {
-      // The keys() method is synchronous, so it throws instead of rejecting
-      const mockFingerIndex = mockIndexes.imgFingerIndex();
-      mockFingerIndex.keys = jest.fn(() => {
-        throw new Error('Index error');
-      });
+      // Create custom mock that throws an error
+      const errorMockFingerIndex = {
+        keys: jest.fn(() => {
+          throw new Error('Index error');
+        })
+      };
 
-      // Need to reinitialize with the throwing mock
-      delete require.cache[require.resolve('../../routes/indexes')];
-      const freshRouter = require('../../routes/indexes').default || require('../../routes/indexes');
+      const customMockIndexes = {
+        fileShaIndex: jest.fn(() => mockIndexes.fileShaIndex()),
+        imgFingerIndex: jest.fn(() => errorMockFingerIndex),
+        ratingIndex: jest.fn(() => mockIndexes.ratingIndex())
+      };
 
-      const freshApp = express();
-      freshApp.use(bodyParser.json());
-      if (freshRouter.initialize) {
-        freshRouter.initialize(config);
-      }
-      freshApp.use('/api/indexes', freshRouter);
+      const { app } = createAppWithCustomMock(customMockIndexes);
 
-      const response = await request(freshApp).get('/api/indexes/fingers/keys');
+      const response = await request(app).get('/api/indexes/fingers/keys');
 
       expect(response.statusCode).toBe(500);
     });
