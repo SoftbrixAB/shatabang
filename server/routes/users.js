@@ -1,47 +1,75 @@
 "use strict";
-var bodyParser = require('body-parser');
-var express = require('express');
-var router  = express.Router();
-
-
-var passport;
-router.initialize = function(config) {
-  passport = config.passport;
-
-  router.post('/authenticate',
-    passport.authenticate('local'),
-      function(req, res) { res.status(200); res.end(); }
-    );
-};
-
-router.use('/authenticate', bodyParser.urlencoded({ extended: true }));
-
-router.post('/invalidate', function(req, res) {
-  req.logout();
-  res.redirect('/');
-});
-
-router.get('/me', function(req, res) {
-  var sess = req.session;
-  if(sess === undefined || req.user === undefined) {
-    // The client is missing a session, return unauthorized response
-    res.status(401).send('Unauthorized');
-    return false;
-  }
-  if (!sess.views) {
-    sess.views  = 0;
-  }
-  sess.views++;
-  res.json({
-    "data": {
-      "type": "user",
-      "id": "me",
-      "attributes": {
-        'username': req.user.username,
-        'user': req.user
-      }
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
     }
-  }).end();
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
 });
-
-module.exports = router;
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+const bodyParser = __importStar(require("body-parser"));
+const express = __importStar(require("express"));
+const router = express.Router();
+let passport;
+router.initialize = function (config) {
+    passport = config.passport;
+    router.post('/authenticate', passport.authenticate('local'), function (req, res) {
+        res.status(200);
+        res.end();
+    });
+};
+router.use('/authenticate', bodyParser.urlencoded({ extended: true }));
+router.post('/invalidate', function (req, res) {
+    req.logout();
+    res.redirect('/');
+});
+router.get('/me', function (req, res) {
+    const sess = req.session;
+    if (sess === undefined || req.user === undefined) {
+        // The client is missing a session, return unauthorized response
+        res.status(401).send('Unauthorized');
+        return false;
+    }
+    if (!sess.views) {
+        sess.views = 0;
+    }
+    sess.views++;
+    res.json({
+        "data": {
+            "type": "user",
+            "id": "me",
+            "attributes": {
+                'username': req.user.username,
+                'user': req.user
+            }
+        }
+    }).end();
+});
+exports.default = router;
+//# sourceMappingURL=users.js.map
