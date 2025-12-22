@@ -1,4 +1,4 @@
-import { RedisClient } from 'redis';
+import { RedisClientType } from 'redis';
 
 export interface GoogleAuthConfig {
   clientID: string;
@@ -30,7 +30,7 @@ export interface Config {
   baseUrl: string;
   port: number;
   google_auth?: GoogleAuthConfig;
-  redisClient?: RedisClient;
+  redisClient?: RedisClientType;
   passport?: any;
   createIfMissing?: boolean;
   deletedDir?: string;

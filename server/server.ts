@@ -13,7 +13,7 @@ import compression = require('compression');
 import session = require('express-session');
 const sha256 = require('sha256');
 import * as url from 'url';
-const RedisStore = require('connect-redis')(session);
+const RedisStore = require('connect-redis').default;
 import * as redis from 'redis';
 const app = express();
 import * as path from 'path';
@@ -40,15 +40,34 @@ console.log('Starting the server with the following configuration', config);
 const baseUrlPath = url.parse(config.baseUrl, true).pathname!;
 
 // Initialize the default redis client
-(config as any).redisClient = redis.createClient({
-  host: config.redisHost,
-  port: config.redisPort
-} as any);
-task_queue.connect(Object.assign(config, { createIfMissing: true }));
+const redisClient = redis.createClient({
+  socket: {
+    host: config.redisHost,
+    port: config.redisPort
+  }
+});
 
-// Check that directories exists
-directories.populatesDirectories(config);
-directories.checkDirectories(config);
+redisClient.on('error', (err) => {
+  console.error('Redis client error:', err);
+});
+
+// Connect to Redis and start server
+redisClient.connect().then(() => {
+  console.log('Redis client connected');
+  (config as any).redisClient = redisClient;
+  task_queue.connect(Object.assign(config, { createIfMissing: true }));
+
+  // Check that directories exists
+  directories.populatesDirectories(config);
+  directories.checkDirectories(config);
+
+  startServer();
+}).catch((err) => {
+  console.error('Failed to connect to Redis:', err);
+  process.exit(1);
+});
+
+function startServer() {
 
 interface RouteConfig {
   path: string;
@@ -150,8 +169,7 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   store: new RedisStore({
-    host: config.redisHost,
-    port: config.redisPort,
+    client: redisClient,
     ttl: 900
   })
 }));
@@ -283,3 +301,5 @@ app.use('/', express.static(__dirname + "/client/dist/"));
 app.listen(config.port, function() {
   console.log("Working on port " + config.port);
 });
+
+} // end startServer()

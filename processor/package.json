@@ -40,7 +40,7 @@
     "idre-array-cache": "0.3.1",
     "node-dir": "0.1.17",
     "obj-flatten": "^2.0.7",
-    "redis": "3.1.2",
+    "redis": "^5.10.0",
     "sha1-file": "^2.0.1",
     "sharp": "^0.34.5",
     "sharp-phash": "^2.2.0",

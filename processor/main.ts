@@ -28,32 +28,59 @@ const processors = [
 ];
 
 // Initialize the default redis client
-(config as any).redisClient = redis.createClient({
-  host: config.redisHost,
-  port: config.redisPort,
-  retry_strategy: function(options: any) {
-    if (options.attempt > 50) {
-      console.error("Retry task processor redis connection failed");
-      return undefined; // End reconnecting with built in error
+const redisClient = redis.createClient({
+  socket: {
+    host: config.redisHost,
+    port: config.redisPort,
+    reconnectStrategy: function(retries: number) {
+      if (retries > 50) {
+        console.error("Retry task processor redis connection failed");
+        return new Error('Redis connection retry limit exceeded');
+      }
+      // reconnect after
+      return Math.min(retries * 4, 100) * 100;
     }
-    if (options.error && options.error.code === "ECONNREFUSED") {
-      // End reconnecting on a specific error and flush all commands with a individual error
-      console.error("The redis server refused the connection");
-    }
-    // reconnect after
-    return Math.min(options.attempt * 4, 100) * 100;
-  },
-} as any);
-task_queue.connect(config);
-
-directories.populatesDirectories(config);
-directories.checkDirectories(config);
-
-processors.forEach(function(processor) {
-  processor.init(config as any, task_queue);
+  }
 });
-// The following tasks runs in a separate process
-task_queue.registerProcess('encode_video', __dirname + '/workers/encode_video');
+
+redisClient.on('error', (err) => {
+  console.error('Redis client error:', err);
+});
+
+// Connect to Redis
+redisClient.connect().then(() => {
+  console.log('Redis client connected');
+  (config as any).redisClient = redisClient;
+  task_queue.connect(config);
+
+  directories.populatesDirectories(config);
+  directories.checkDirectories(config);
+
+  processors.forEach(function(processor) {
+    processor.init(config as any, task_queue);
+  });
+  // The following tasks runs in a separate process
+  task_queue.registerProcess('encode_video', __dirname + '/workers/encode_video');
+
+  task_queue.queueTask('upgrade_check', {}, 'high')
+    .then(async () => {
+      console.log("Running task processor...");
+      await task_queue.clearQueue('worker_log');
+      task_queue.queueTask('worker_log');
+      await task_queue.queueTask('worker_log', {}, 5, {
+        repeat: {
+          every: 5 * 60 * 1000
+        },
+        removeOnComplete: true,
+        removeOnFail: true
+      });
+      queImport();
+    }, disconnectCallback);
+}).catch((err) => {
+  console.error('Failed to connect to Redis:', err);
+  process.exit(1);
+});
+
 
 function shutdown() {
   setTimeout(shutdown, 5000);
@@ -61,9 +88,13 @@ function shutdown() {
   task_queue.disconnect(2000, disconnectCallback);
 }
 
-function disconnectCallback(err?: any) {
+async function disconnectCallback(err?: any) {
   console.log('Queue shutdown: ', err || 'OK');
-  (config as any).redisClient.quit();
+  try {
+    await (config as any).redisClient.quit();
+  } catch (e) {
+    console.error('Error closing Redis connection:', e);
+  }
   process.exit(0);
 }
 
@@ -92,20 +123,6 @@ process.on('unhandledRejection', (reason, p) => {
   console.dir('Stack: ', (reason as any).stack);
 });
 
-task_queue.queueTask('upgrade_check', {}, 'high')
-  .then(async () => {
-    console.log("Running task processor...");
-    await task_queue.clearQueue('worker_log');
-    task_queue.queueTask('worker_log');
-    await task_queue.queueTask('worker_log', {}, 5, {
-      repeat: {
-        every: 5 * 60 * 1000
-      },
-      removeOnComplete: true,
-      removeOnFail: true
-    });
-    queImport();
-  }, disconnectCallback);
 
 let timeOut: NodeJS.Timeout = setTimeout(() => {}, 0);
 const queImport = function() {

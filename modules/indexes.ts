@@ -1,21 +1,21 @@
 import vemdalenIndex = require('vemdalen-index');
 import shIndex = require('stureby-index');
 import * as path from 'path';
-import { RedisClient } from 'redis';
+import { RedisClientType } from 'redis';
 
-export const keywordsIndex = (redisClient: RedisClient): any => 
+export const keywordsIndex = (redisClient: RedisClientType): any =>
   vemdalenIndex('keywords', {
     indexType: 'strings_unique',
     client: redisClient
   });
 
-export const metaIndex = (redisClient: RedisClient): any => 
+export const metaIndex = (redisClient: RedisClientType): any =>
   vemdalenIndex('meta', {
     indexType: 'object',
     client: redisClient
   });
 
-export const regionsIndex = (redisClient: RedisClient): any => 
+export const regionsIndex = (redisClient: RedisClientType): any =>
   vemdalenIndex('metaRegions', {
     indexType: 'object',
     client: redisClient

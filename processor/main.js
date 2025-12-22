@@ -63,38 +63,66 @@ const processors = [
     worker_log_1.default,
 ];
 // Initialize the default redis client
-config_1.default.redisClient = redis.createClient({
-    host: config_1.default.redisHost,
-    port: config_1.default.redisPort,
-    retry_strategy: function (options) {
-        if (options.attempt > 50) {
-            console.error("Retry task processor redis connection failed");
-            return undefined; // End reconnecting with built in error
+const redisClient = redis.createClient({
+    socket: {
+        host: config_1.default.redisHost,
+        port: config_1.default.redisPort,
+        reconnectStrategy: function (retries) {
+            if (retries > 50) {
+                console.error("Retry task processor redis connection failed");
+                return new Error('Redis connection retry limit exceeded');
+            }
+            // reconnect after
+            return Math.min(retries * 4, 100) * 100;
         }
-        if (options.error && options.error.code === "ECONNREFUSED") {
-            // End reconnecting on a specific error and flush all commands with a individual error
-            console.error("The redis server refused the connection");
-        }
-        // reconnect after
-        return Math.min(options.attempt * 4, 100) * 100;
-    },
+    }
 });
-task_queue.connect(config_1.default);
-directories.populatesDirectories(config_1.default);
-directories.checkDirectories(config_1.default);
-processors.forEach(function (processor) {
-    processor.init(config_1.default, task_queue);
+redisClient.on('error', (err) => {
+    console.error('Redis client error:', err);
 });
-// The following tasks runs in a separate process
-task_queue.registerProcess('encode_video', __dirname + '/workers/encode_video');
+// Connect to Redis
+redisClient.connect().then(() => {
+    console.log('Redis client connected');
+    config_1.default.redisClient = redisClient;
+    task_queue.connect(config_1.default);
+    directories.populatesDirectories(config_1.default);
+    directories.checkDirectories(config_1.default);
+    processors.forEach(function (processor) {
+        processor.init(config_1.default, task_queue);
+    });
+    // The following tasks runs in a separate process
+    task_queue.registerProcess('encode_video', __dirname + '/workers/encode_video');
+    task_queue.queueTask('upgrade_check', {}, 'high')
+        .then(async () => {
+        console.log("Running task processor...");
+        await task_queue.clearQueue('worker_log');
+        task_queue.queueTask('worker_log');
+        await task_queue.queueTask('worker_log', {}, 5, {
+            repeat: {
+                every: 5 * 60 * 1000
+            },
+            removeOnComplete: true,
+            removeOnFail: true
+        });
+        queImport();
+    }, disconnectCallback);
+}).catch((err) => {
+    console.error('Failed to connect to Redis:', err);
+    process.exit(1);
+});
 function shutdown() {
     setTimeout(shutdown, 5000);
     clearTimeout(timeOut);
     task_queue.disconnect(2000, disconnectCallback);
 }
-function disconnectCallback(err) {
+async function disconnectCallback(err) {
     console.log('Queue shutdown: ', err || 'OK');
-    config_1.default.redisClient.quit();
+    try {
+        await config_1.default.redisClient.quit();
+    }
+    catch (e) {
+        console.error('Error closing Redis connection:', e);
+    }
     process.exit(0);
 }
 // Ctrl-c
@@ -118,20 +146,6 @@ process.on('unhandledRejection', (reason, p) => {
     console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
     console.dir('Stack: ', reason.stack);
 });
-task_queue.queueTask('upgrade_check', {}, 'high')
-    .then(async () => {
-    console.log("Running task processor...");
-    await task_queue.clearQueue('worker_log');
-    task_queue.queueTask('worker_log');
-    await task_queue.queueTask('worker_log', {}, 5, {
-        repeat: {
-            every: 5 * 60 * 1000
-        },
-        removeOnComplete: true,
-        removeOnFail: true
-    });
-    queImport();
-}, disconnectCallback);
 let timeOut = setTimeout(() => { }, 0);
 const queImport = function () {
     timeOut = setTimeout(async function () {
