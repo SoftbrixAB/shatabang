@@ -34,8 +34,8 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ratingIndex = exports.importedTimesIndex = exports.imgFingerIndex = exports.fileShaIndex = exports.regionsIndex = exports.metaIndex = exports.keywordsIndex = void 0;
-const vemdalenIndex = __importStar(require("vemdalen-index"));
-const shIndex = __importStar(require("stureby-index"));
+const vemdalenIndex = require("vemdalen-index");
+const shIndex = require("stureby-index");
 const path = __importStar(require("path"));
 const keywordsIndex = (redisClient) => vemdalenIndex('keywords', {
     indexType: 'strings_unique',

@@ -1,5 +1,5 @@
 "use strict"
-var taskProcess = require('../processor/workers/update_import_directory');
+var taskProcess = require('../processor/workers/update_import_directory').default || require('../processor/workers/update_import_directory');
 
 var taskQueMock = {
   registerTaskProcessor : jest.fn((name, func) => func('data', {}, () => {})),

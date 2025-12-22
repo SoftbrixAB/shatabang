@@ -2,7 +2,7 @@
 
 var assert = require('assert');
 var fs = require('fs');
-var shFra = require('../processor/modules/shatabang_fra');
+var shFra = require('../processor/modules/shatabang_fra').default || require('../processor/modules/shatabang_fra');
 
 var relativeTestFile = "./test/test_data/faces.jpg";
 var noFaceFile = "./test/test_data/1920/no_face.jpg";

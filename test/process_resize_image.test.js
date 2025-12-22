@@ -1,7 +1,7 @@
 "use strict"
 var assert = require('assert');
 
-var taskProcess = require('../processor/workers/resize_image');
+var taskProcess = require('../processor/workers/resize_image').default || require('../processor/workers/resize_image');
 var processTester = require('./process_test_base');
 
 var relativeTestFile = "./faces.jpg";

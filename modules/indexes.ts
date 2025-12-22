@@ -1,5 +1,5 @@
-import * as vemdalenIndex from 'vemdalen-index';
-import * as shIndex from 'stureby-index';
+import vemdalenIndex = require('vemdalen-index');
+import shIndex = require('stureby-index');
 import * as path from 'path';
 import { RedisClient } from 'redis';
 

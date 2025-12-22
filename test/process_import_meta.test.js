@@ -1,5 +1,5 @@
 "use strict"
-var taskProcess = require('../processor/workers/import_meta');
+var taskProcess = require('../processor/workers/import_meta').default || require('../processor/workers/import_meta');
 var processTester = require('./process_test_base');
 
 var relativeTestFile = "./faces.jpg";
