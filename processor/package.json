@@ -57,7 +57,7 @@
     "fakeredis": "2.0.0",
     "mocha": "^11.7.5",
     "nodemon": "^3.1.4",
-    "npm-run-all2": "5.0.0"
+    "npm-run-all2": "^6.2.6"
   },
   "preferGlobal": true,
   "private": true,
