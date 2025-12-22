@@ -39,7 +39,7 @@
     "heic-convert": "^2.1.0",
     "idre-array-cache": "0.3.1",
     "node-dir": "0.1.17",
-    "obj-flatten": "2.0.6",
+    "obj-flatten": "^2.0.7",
     "redis": "3.1.2",
     "sha1-file": "2.0.0",
     "sharp": "^0.34.5",
