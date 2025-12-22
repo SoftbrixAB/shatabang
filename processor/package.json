@@ -44,10 +44,10 @@
     "sha1-file": "2.0.0",
     "sharp": "^0.34.5",
     "sharp-phash": "^2.2.0",
-    "stureby-index": "^3.3.0",
+    "stureby-index": "^4.0.0",
     "underscore": "^1.13.7",
     "variance": "0.0.1",
-    "vega-media-info": "2.8.0",
+    "vega-media-info": "^3.0.0",
     "vemdalen-index": "^2.0.2"
   },
   "devDependencies": {
