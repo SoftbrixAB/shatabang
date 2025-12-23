@@ -33,23 +33,24 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var express = __importStar(require("express"));
-var router = express.Router();
-var indexes = require("../common/indexes");
-var index;
+const express = __importStar(require("express"));
+const router = express.Router();
+const indexes = require("../common/indexes");
+let index;
 router.initialize = function (config) {
     index = indexes.keywordsIndex(config.redisClient);
 };
 router.get('/', function (req, res) {
-    index.keys().then(function (keys) {
+    index.keys().then((keys) => {
         res.end(JSON.stringify({ keywords: keys }));
     })
-        .catch(function (err) {
+        .catch((err) => {
         res.status(500).end(err.message);
     });
 });
 router.get('/:id', function (req, res) {
     index.get(req.params.id)
-        .then(function (values) { return res.end(JSON.stringify({ keyword: values })); }, function (err) { return res.status(500).end(err.message); });
+        .then((values) => res.end(JSON.stringify({ keyword: values })), (err) => res.status(500).end(err.message));
 });
 exports.default = router;
+//# sourceMappingURL=keywords.js.map
