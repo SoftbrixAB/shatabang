@@ -12,6 +12,24 @@ Shatabang is an image and video library management web application that organize
 
 The application imports media files, extracts EXIF metadata, generates resized images, detects duplicates using perceptual hashing, and serves them through a responsive web interface.
 
+## Requirements
+
+### Node.js
+
+This project requires **Node.js 22.11.0 or higher** (LTS).
+
+```bash
+# Check your Node.js version
+node --version  # Should be v22.11.0 or higher
+
+# If using nvm, switch to the correct version
+nvm use
+# or
+nvm install 22.11.0
+```
+
+The `.nvmrc` file is provided for automatic version management with nvm.
+
 ## Common Development Commands
 
 ### Running the Application

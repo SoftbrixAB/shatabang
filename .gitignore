@@ -15,3 +15,11 @@ coverage
 *.d.ts
 *.d.ts.map
 *.js.map
+
+# Compiled JavaScript from TypeScript sources
+/modules/*.js
+/server/routes/*.js
+/server/server.js
+/processor/**/*.js
+!processor/processor.js
+!/server/test/**/*.js

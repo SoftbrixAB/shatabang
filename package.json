@@ -25,6 +25,10 @@
     "postaudit": "npm audit --prefix server; npm audit --prefix processor"
   },
   "main": "server/server.js",
+  "engines": {
+    "node": ">=22.11.0",
+    "npm": ">=10.0.0"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/softbrix/shatabang"

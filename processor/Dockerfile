@@ -1,4 +1,4 @@
-FROM node:lts
+FROM node:22
 
 ENV STORAGE_DIR=/mnt/sorted/
 ENV CACHE_DIR=/mnt/cache/
