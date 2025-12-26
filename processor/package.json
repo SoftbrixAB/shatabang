@@ -7,7 +7,7 @@
   "scripts": {
     "build": "cd .. && npm run build:modules && npm run build:processor",
     "dev": "npm run build && npm-run-all --parallel start_redis start",
-    "start": "nodemon --watch . --watch ../modules --ext ts,js --exec 'npm run build && node --preserve-symlinks main.js'",
+    "start": "nodemon --watch . --watch ../modules --ext ts --ignore '*.js' --ignore '*.d.ts' --exec 'npm run build && node --preserve-symlinks main.js'",
     "test": "mocha",
     "start_redis": "redis-server"
   },
