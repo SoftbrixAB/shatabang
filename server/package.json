@@ -5,7 +5,9 @@
   "author": "Andreas Sehr <andreas@sehr.se>",
   "contributors": [],
   "scripts": {
-    "dev": "npm-run-all --parallel start_redis server",
+    "build": "cd .. && npm run build:modules && npm run build:server",
+    "dev": "npm run build && npm-run-all --parallel start_redis server",
+    "server": "nodemon --watch . --watch ../modules --ext ts,js --exec 'npm run build && node --preserve-symlinks server.js'",
     "test": "jest",
     "start": "node --preserve-symlinks server.js",
     "start_redis": "redis-server"

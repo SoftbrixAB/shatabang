@@ -32,27 +32,43 @@ The `.nvmrc` file is provided for automatic version management with nvm.
 
 ## Common Development Commands
 
+### Building TypeScript
+
+The project is written in TypeScript and must be compiled before running:
+
+```bash
+# Build all TypeScript (modules, server, and processor)
+npm run build
+
+# Build specific components
+npm run build:modules     # Shared modules
+npm run build:server      # Server routes and main
+npm run build:processor   # Processor workers and modules
+```
+
 ### Running the Application
 
 ```bash
 # Install all dependencies (root, server, and processor workspaces)
 npm install
 
-# Run both server and processor in development mode
+# Run both server and processor in development mode (auto-rebuilds on changes)
 npm run dev
 
-# Run only the server with auto-reload
+# Run only the server with auto-reload (auto-rebuilds on TypeScript changes)
 npm run server
 
-# Run only the processor with auto-reload
+# Run only the processor with auto-reload (auto-rebuilds on TypeScript changes)
 npm run processor
 
-# Start the application in production mode
+# Start the application in production mode (builds first)
 npm start
 
 # Start Redis (required for both server and processor)
 npm run start_redis
 ```
+
+**Note**: The `dev`, `server`, and `processor` scripts automatically watch for TypeScript changes and rebuild on save.
 
 ### Testing
 
