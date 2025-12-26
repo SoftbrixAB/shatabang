@@ -30,6 +30,49 @@ nvm install 22.11.0
 
 The `.nvmrc` file is provided for automatic version management with nvm.
 
+### Configuration
+
+Before running the application, you need a configuration file:
+
+```bash
+# Copy the example configuration
+cp config_server.example.json config_server.json
+
+# Edit with your settings (or use defaults for local development)
+# The default config points to ./data/sorted and ./data/cache
+```
+
+**Minimal config for local development** (already set in default):
+```json
+{
+  "storageDir": "./data/sorted",
+  "cacheDir": "./data/cache",
+  "redisHost": "127.0.0.1",
+  "redisPort": 6379,
+  "port": 3000,
+  "baseUrl": "/"
+}
+```
+
+**For production**, set these via environment variables or in `config_server.json`:
+- `serverSalt` - Random salt for password hashing
+- `adminHash` - SHA256 hash of admin password
+- `google_auth` - Optional Google OAuth configuration
+
+### Redis
+
+Redis is required for both server and processor:
+
+```bash
+# Install Redis (macOS)
+brew install redis
+
+# Start Redis
+redis-server
+# or
+npm run start_redis
+```
+
 ## Common Development Commands
 
 ### Building TypeScript
