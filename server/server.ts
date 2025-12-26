@@ -16,7 +16,7 @@ const RedisStore = require('connect-redis').default;
 import * as redis from 'redis';
 const app = express();
 import * as path from 'path';
-import * as passport from 'passport';
+const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const LocalStrategy = require('passport-local').Strategy;
 
