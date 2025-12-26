@@ -1,11 +1,10 @@
 import config from './common/config';
 import * as directories from './common/directories';
-const task_queue = require('./common/task_queue');
+import task_queue from './common/task_queue';
 const Bull = require('bull');
 const Arena = require('bull-arena');
 const { createBullBoard } = require('@bull-board/api');
 const { BullAdapter } = require('@bull-board/api/bullAdapter');
-const { BullMQAdapter } = require('@bull-board/api/bullMQAdapter');
 const { ExpressAdapter } = require('@bull-board/express');
 import express = require('express');
 import bodyParser = require('body-parser');

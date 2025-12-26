@@ -1,7 +1,7 @@
 import * as redis from 'redis';
 import config from './common/config';
 import * as directories from './common/directories';
-const task_queue = require('./common/task_queue');
+import task_queue from './common/task_queue';
 
 import clear_index from './workers/clear_index';
 import create_image_finger from './workers/create_image_finger';
