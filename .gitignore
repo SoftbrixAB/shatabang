@@ -18,8 +18,9 @@ coverage
 
 # Compiled JavaScript from TypeScript sources
 /modules/*.js
-/server/routes/*.js
-/server/server.js
-/processor/**/*.js
-!processor/processor.js
-!/server/test/**/*.js
+/processor/modules/*.js
+/server/dist/
+/processor/dist/
+
+# Auto-generated files
+/server/routes/version-info.ts

@@ -29,7 +29,7 @@ export interface Config {
   redisPort: number;
   baseUrl: string;
   port: number;
-  google_auth?: GoogleAuthConfig;
+  googleAuth?: GoogleAuthConfig;
   redisClient?: RedisClientType;
   passport?: any;
   createIfMissing?: boolean;

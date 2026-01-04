@@ -1,14 +1,13 @@
 import * as express from 'express';
-const router: express.Router = express.Router();
+import { VERSION } from './version-info';
 
-// Read version from package.json
-const version = require('../package.json').version;
+const router: express.Router = express.Router();
 
 (router as any).initialize = function() {
 };
 
 router.get('/', function(req, res) {
-  res.send(version).end();
+  res.send(VERSION).end();
 });
 
 export default router;

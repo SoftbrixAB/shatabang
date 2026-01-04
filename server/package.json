@@ -5,11 +5,11 @@
   "author": "Andreas Sehr <andreas@sehr.se>",
   "contributors": [],
   "scripts": {
-    "build": "cd .. && npm run build:modules && npm run build:server",
+    "build": "cd .. && node scripts/generate-version.js && npm run build:modules && npm run build:server",
     "dev": "npm run build && npm-run-all --parallel start_redis server",
-    "server": "nodemon --watch . --watch ../modules --ext ts --ignore '*.js' --ignore '*.d.ts' --exec 'npm run build && node --preserve-symlinks server.js'",
+    "server": "nodemon --watch . --watch ../modules --ext ts --ignore 'dist/**' --ignore '*.js' --ignore '*.d.ts' --exec 'npm run build && node --preserve-symlinks dist/server.js'",
     "test": "jest",
-    "start": "node --preserve-symlinks server.js",
+    "start": "node --preserve-symlinks dist/server.js",
     "start_redis": "redis-server"
   },
   "main": "server.js",

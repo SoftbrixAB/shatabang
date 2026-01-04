@@ -1,3 +1,4 @@
+import * as bodyParser from 'body-parser';
 import * as express from 'express';
 const router: express.Router = express.Router();
 
@@ -9,18 +10,20 @@ function isEmpty(s: any): boolean {
   return s !== undefined && typeof s === 'string' && s.length > 0;
 }
 
-(router as any).initialize = function(config: any) {
-  [{ conf: 'admin_hash', name: 'admin' },
-   { conf: 'google_auth', name: 'google' }]
+(router as any).initialize = function(context: any) {
+  [{ conf: 'adminHash', name: 'admin' },
+   { conf: 'googleAuth', name: 'google' }]
     .forEach(function(e) {
-      if (!isEmpty(config[e.conf])) {
+      if (context[e.conf] !== undefined) {
         auth_methods.push(e.name);
       }
     });
-  passport = config.passport;
-  baseUrl = config.baseUrl;
+  if (auth_methods.length === 0) {
+    throw new Error('No authentication methods configured');
+  }
+  passport = context.passport;
+  baseUrl = context.baseUrl;
 
-  console.log('baseUrl', baseUrl);
 
   // Redirect the user to Google for authentication.  When complete, Google
   // will redirect the user back to the application at
@@ -45,11 +48,22 @@ function isEmpty(s: any): boolean {
       // Successful authentication, redirect home.
       res.redirect(baseUrl);
     });
+
+
+  router.use('/login', bodyParser.urlencoded({ extended: true }));
+
+  router.post('/login',
+    passport.authenticate('local'),
+    function(req, res) {
+      res.status(200);
+      res.end();
+    }
+  );
 };
 
 router.get('/list', function(req, res) {
   res.setHeader('content-type', 'application/json');
   res.send(auth_methods).status(200);
 });
-
+ 
 export default router;
