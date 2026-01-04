@@ -78,6 +78,7 @@ interface RouteConfig {
 
 const routes: RouteConfig[] = [];
 routes.push({ path: 'upload', route: require('./routes/uploads').default });
+routes.push({ path: 'uploads', route: require('./routes/uploads').default });
 routes.push({ path: 'images', route: require('./routes/images').default });
 routes.push({ path: 'duplicates', route: require('./routes/duplicates').default });
 routes.push({ path: 'dirs', route: require('./routes/dirs').default });
