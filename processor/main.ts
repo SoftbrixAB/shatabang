@@ -2,6 +2,7 @@ import * as redis from 'redis';
 import config from './common/config';
 import * as directories from './common/directories';
 import task_queue from './common/task_queue';
+import { createRedisV3Wrapper } from './common/redis-compat';
 
 import clear_index from './workers/clear_index';
 import create_image_finger from './workers/create_image_finger';
@@ -50,7 +51,8 @@ redisClient.on('error', (err) => {
 // Connect to Redis
 redisClient.connect().then(() => {
   console.log('Redis client connected');
-  (config as any).redisClient = redisClient;
+  // Wrap the modern Redis client with v3 compatibility for legacy libraries
+  (config as any).redisClient = createRedisV3Wrapper(redisClient);
   task_queue.connect(config);
 
   directories.populatesDirectories(config);
@@ -91,7 +93,7 @@ function shutdown() {
 async function disconnectCallback(err?: any) {
   console.log('Queue shutdown: ', err || 'OK');
   try {
-    await (config as any).redisClient.quit();
+    await redisClient.quit();
   } catch (e) {
     console.error('Error closing Redis connection:', e);
   }

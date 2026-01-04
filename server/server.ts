@@ -1,6 +1,7 @@
 import config from './common/config';
 import * as directories from './common/directories';
 import task_queue from './common/task_queue';
+import { createRedisV3Wrapper } from './common/redis-compat';
 const Bull = require('bull');
 const Arena = require('bull-arena');
 const { createBullBoard } = require('@bull-board/api');
@@ -12,7 +13,7 @@ import compression = require('compression');
 import session = require('express-session');
 const sha256 = require('sha256');
 import * as url from 'url';
-const RedisStore = require('connect-redis').default;
+import {RedisStore} from "connect-redis"
 import * as redis from 'redis';
 const app = express();
 import * as path from 'path';
@@ -53,7 +54,8 @@ redisClient.on('error', (err) => {
 // Connect to Redis and start server
 redisClient.connect().then(() => {
   console.log('Redis client connected');
-  (config as any).redisClient = redisClient;
+  // Wrap the modern Redis client with v3 compatibility for legacy libraries
+  (config as any).redisClient = createRedisV3Wrapper(redisClient);
   task_queue.connect(Object.assign(config, { createIfMissing: true }));
 
   // Check that directories exists
