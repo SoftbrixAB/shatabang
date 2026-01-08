@@ -1,6 +1,6 @@
 "use strict"
 var assert = require('assert');
-var FileTypeRegexp = require('../processor/modules/file_type_regexp');
+var FileTypeRegexp = require('../processor/modules/file_type_regexp').default || require('../processor/modules/file_type_regexp');
 
 describe('File type regexp', () => {
   let expected = '/mnt/cache/1920/2005/03/19/150739.jpg';

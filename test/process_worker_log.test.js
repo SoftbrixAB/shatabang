@@ -2,7 +2,7 @@
 var assert = require('assert');
 const { existsSync, unlinkSync, readFileSync } = require('fs');
 
-var taskProcess = require('../processor/workers/worker_log');
+var taskProcess = require('../processor/workers/worker_log').default || require('../processor/workers/worker_log');
 var processTester = require('./process_test_base');
 
 const worklogFilePath = './test/test_data/workLog'; 

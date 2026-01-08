@@ -1,7 +1,7 @@
 "use strict"
 var assert = require('assert');
 var fs = require('fs');
-var encoderJob = require('../processor/workers/encode_video');
+var encoderJob = require('../processor/workers/encode_video').default || require('../processor/workers/encode_video');
 
 const DIR = './test/test_data/'
 const TEST_FILE = 'video.mp4';

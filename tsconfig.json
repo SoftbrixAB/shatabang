@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "lib": ["ES2020"],
+    "outDir": "./modules",
+    "rootDir": "./modules",
+    "removeComments": false,
+    "strict": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "preserveSymlinks": true,
+    "allowJs": true,
+    "typeRoots": ["./node_modules/@types"],
+    "types": []
+  },
+  "include": ["modules/**/*.ts"],
+  "exclude": ["node_modules", "coverage", "client", "test"]
+}

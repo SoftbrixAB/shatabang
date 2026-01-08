@@ -1,5 +1,5 @@
 # Builder
-FROM node:14 AS client-builder
+FROM node:22-alpine AS client-builder
 LABEL author="Andreas Sehr"
 ENV BUILD_BASE_URL=/replacemeurl/
 WORKDIR /usr/src/
@@ -9,7 +9,7 @@ RUN npm ci && \
     node_modules/ember-cli/bin/ember build --environment='production'
 
 # server
-FROM node:lts
+FROM node:22-alpine
 LABEL author="Andreas Sehr"
 
 ENV SERVER_SALT=6548ee70d7d258e34eaf4daf9d8c30214bf8163e

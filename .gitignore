@@ -10,3 +10,17 @@ test/test_data
 
 # jest coverage report
 coverage
+
+# TypeScript compilation artifacts
+*.d.ts
+*.d.ts.map
+*.js.map
+
+# Compiled JavaScript from TypeScript sources
+/modules/*.js
+/processor/modules/*.js
+/server/dist/
+/processor/dist/
+
+# Auto-generated files
+/server/routes/version-info.ts

@@ -1,7 +1,7 @@
 "use strict"
 var assert = require('assert');
 var fs = require('fs');
-var thumbnailer = require('../processor/modules/thumbnailer');
+var thumbnailer = require('../processor/modules/thumbnailer').default || require('../processor/modules/thumbnailer');
 
 describe('File type regexp', () => {
   const heicFileName = './test/test_data/sample1.heic';

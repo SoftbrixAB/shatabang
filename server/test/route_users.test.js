@@ -1,7 +1,7 @@
 "use strict"
 const request = require("supertest");
 const express = require('express');
-const versionRouter = require('../routes/version');
+const versionRouter = require('../routes/version').default || require('../routes/version');
 
 const app = express();
 
